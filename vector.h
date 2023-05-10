@@ -54,15 +54,15 @@ public:
     ~Vector() { uncreate(); } 
 
     // operator =
-    Vector &operator=(const Vector &rhs)
+    Vector &operator=(const Vector &source)
     {
         // patikriname ar ne lygu
-        if (&rhs != this)
+        if (&source != this)
         {
             // atlaisviname seną this objekto atmintį
             uncreate();
-            // perkopijuojame elementus iš rhs į lhs (this)
-            create(rhs.begin(), rhs.end());
+            // perkopijuojame elementus iš source į this
+            create(source.begin(), source.end());
         }
         return *this;
     }
@@ -70,9 +70,6 @@ public:
     //assign
     void assign(size_type n, const T &t) { create(n, t); }
     void assign(const_iterator first, const_iterator last) { create(first, last); }
-
-    //get_allocator
-    //allocator_type get_allocator() const { return alloc; }
 
     // element access
     T &at(size_type n) { return (n < size()) ? data[n] : throw std::out_of_range("Vector::at()"); }
@@ -233,6 +230,18 @@ private:
         // dvigubai daugiau vietos, nei buvo
         size_type new_size = std::max(2 * (limit - data), ptrdiff_t(1));
         // išskirti naują vietą ir perkopijuoti egzistuojančius elementus
+        iterator new_data = alloc.allocate(new_size);
+        iterator new_avail = std::uninitialized_copy(data, avail, new_data);
+        // atlaisvinti seną vietą
+        uncreate();
+        // reset'int rodykles į naujai išskirtą vietą
+        data = new_data;
+        avail = new_avail;
+        limit = data + new_size;
+    }
+    void grow(int n)
+    {
+        size_type new_size = n;
         iterator new_data = alloc.allocate(new_size);
         iterator new_avail = std::uninitialized_copy(data, avail, new_data);
         // atlaisvinti seną vietą
