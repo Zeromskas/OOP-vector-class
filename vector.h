@@ -156,7 +156,11 @@ public:
     }
 
     template <typename... Args2>
-    constexpr reference emplace_back(Args2 &&...args);
+    void emplace_back(Args2 &&...args)
+    {
+        T item(args...);
+        push_back(item);
+    }
 
     void pop_back()
     {
